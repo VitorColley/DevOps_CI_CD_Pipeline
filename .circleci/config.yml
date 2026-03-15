@@ -41,12 +41,14 @@ jobs:
             command: | 
                     ssh -o StrictHostKeyChecking=no ec2-user@${HOST} '
                       cd ~/app &&
-                      git pull origin main &&
+                      git fetch origin &&
+                      git reset --hard origin/main &&
+                      git clean -fd &&
                       npm ci &&
                       echo "$PRIVATE_KEY" > privatekey.pem &&
                       echo "$SERVER" > server.crt &&
-                      pm2 delete app || true &&
-                      pm2 start ./bin/www --name app &&
+                      pm2 delete mathapp || true &&
+                      pm2 start ./bin/www --name mathapp &&
                       pm2 save
                     '
 
