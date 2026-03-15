@@ -1,0 +1,54 @@
+# CircleCI configuration file
+# Based on the official CircleCI documentation and examples on the CircleCI website and YouTube channel.
+# https://circleci.com/docs/guides/getting-started/introduction-to-yaml-configurations/
+# https://circleci.com/blog/deploy-a-node-app-on-aws-ec2-linux/
+# https://www.youtube.com/watch?v=Js3hMUsSZ2c&list=PL9GgS3TcDh8x6tcY7HDq2zmEx0fAtwWsM
+
+version: 2.1
+
+workflows:
+  jobs:
+    - build:
+        filters:
+          branches:
+            only: 
+              - main
+    - deploy:
+        filters:
+          branches:
+            only: 
+              - main
+        requires:
+          - build
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:16.14.0
+    steps:
+      - checkout
+      - run:
+          name: update npm
+          command: 'sudo npm install'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install dependencies
+          command: 'npm install'
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+    
+  deploy:
+    docker:
+      - image: cimg/node:16.14.0
+    steps:
+      - add_ssh_keys: 
+          fingerprints: 
+            - "${SSH_KEY}"
+
+      - run: 
+          name: Deploy
+          command: | 
+            ssh -o StrictHostKeyChecking=no ec2-user@${HOST} 'bash ~/simple-application/scripts/deploy.sh'
