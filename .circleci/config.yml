@@ -43,8 +43,6 @@ jobs:
                       cd ~/app &&
                       git pull origin main &&
                       npm ci &&
-                      echo "$PRIVATE_KEY" > privatekey.pem &&
-                      echo "$SERVER" > server.crt &&
                       pm2 delete app || true &&
                       pm2 start ./bin/www --name app &&
                       pm2 save
