@@ -36,17 +36,14 @@ jobs:
         - run: 
             name: Deploy
             command: | 
-              - run:
-    name: Deploy
-    command: |
-      ssh -o StrictHostKeyChecking=no ec2-user@${HOST} '
-        cd ~/app &&
-        git pull origin main &&
-        npm ci &&
-        pm2 delete app || true &&
-        pm2 start ./bin/www --name app &&
-        pm2 save
-      '
+                    ssh -o StrictHostKeyChecking=no ec2-user@${HOST} '
+                      cd ~/app &&
+                      git pull origin main &&
+                      npm ci &&
+                      pm2 delete app || true &&
+                      pm2 start ./bin/www --name app &&
+                      pm2 save
+                    '
 
 workflows:
   version: 2
