@@ -6,49 +6,51 @@
 
 version: 2.1
 
-workflows:
-  jobs:
-    - build:
-        filters:
-          branches:
-            only: 
-              - main
-    - deploy:
-        filters:
-          branches:
-            only: 
-              - main
-        requires:
-          - build
-
 jobs:
-  build:
-    docker:
-      - image: cimg/node:16.14.0
-    steps:
-      - checkout
-      - run:
-          name: update npm
-          command: 'sudo npm install'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
-      - run:
-          name: install dependencies
-          command: 'npm install'
-      - save_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
-          paths:
-            - ./node_modules
-    
-  deploy:
-    docker:
-      - image: cimg/node:16.14.0
-    steps:
-      - add_ssh_keys: 
-          fingerprints: 
-            - "${SSH_KEY}"
+    build:
+      docker:
+        - image: cimg/node:16.14.0
+      steps:
+        - checkout
+        - run:
+            name: update npm
+            command: 'sudo npm install'
+        - restore_cache:
+            key: dependency-cache-{{ checksum "package-lock.json" }}
+        - run:
+            name: install dependencies
+            command: 'npm install'
+        - save_cache:
+            key: dependency-cache-{{ checksum "package-lock.json" }}
+            paths:
+              - ./node_modules
+      
+    deploy:
+      docker:
+        - image: cimg/node:16.14.0
+      steps:
+        - add_ssh_keys: 
+            fingerprints: 
+              - "${SSH_KEY}"
 
-      - run: 
-          name: Deploy
-          command: | 
-            ssh -o StrictHostKeyChecking=no ec2-user@${HOST} 'bash ~/simple-application/scripts/deploy.sh'
+        - run: 
+            name: Deploy
+            command: | 
+              ssh -o StrictHostKeyChecking=no ec2-user@${HOST} 'bash ~/simple-application/scripts/deploy.sh'
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: 
+                - main
+      - deploy:
+          filters:
+            branches:
+              only: 
+                - main
+          requires:
+            - build
