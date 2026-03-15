@@ -36,7 +36,7 @@ jobs:
         - run: 
             name: Deploy
             command: | 
-              ssh -o StrictHostKeyChecking=no ec2-user@${HOST} 'bash ~/simple-application/scripts/deploy.sh'
+              ssh -o StrictHostKeyChecking=no ec2-user@${HOST} 'bash ~/app/scripts/deploy.sh'
 
 workflows:
   version: 2
