@@ -24,6 +24,9 @@ jobs:
             key: dependency-cache-{{ checksum "package-lock.json" }}
             paths:
               - ./node_modules
+        - run:
+            name: run tests
+            command: 'npm run test'
       
     deploy:
       docker:
