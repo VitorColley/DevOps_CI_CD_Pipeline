@@ -36,7 +36,17 @@ jobs:
         - run: 
             name: Deploy
             command: | 
-              ssh -o StrictHostKeyChecking=no ec2-user@${HOST} 'bash ~/app/simpleapplication/scripts/deploy.sh'
+              - run:
+    name: Deploy
+    command: |
+      ssh -o StrictHostKeyChecking=no ec2-user@${HOST} '
+        cd ~/app &&
+        git pull origin main &&
+        npm ci &&
+        pm2 delete app || true &&
+        pm2 start ./bin/www --name app &&
+        pm2 save
+      '
 
 workflows:
   version: 2
